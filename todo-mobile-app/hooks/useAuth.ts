@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { API_BASE_URL } from './../../todo-web-app/app/config';
 
-const API_URL = 'http://192.168.29.9:4000/api'
+const API_URL = API_BASE_URL + '/api'
 
 interface User {
   id: string;
