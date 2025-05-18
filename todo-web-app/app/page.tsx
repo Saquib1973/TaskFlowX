@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PlusIcon, TrashIcon, CheckIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
 import axios from 'axios'
 import { useAuth } from './context/AuthContext'
+import { API_ENDPOINTS } from './config'
 
 interface Todo {
   id: string
@@ -28,14 +29,14 @@ export default function Home() {
   const { data: todos = [], isLoading } = useQuery<Todo[]>({
     queryKey: ['todos'],
     queryFn: async () => {
-      const response = await axios.get<TodosResponse>('http://localhost:4000/api/todos')
+      const response = await axios.get<TodosResponse>(API_ENDPOINTS.todos)
       return response.data.data.todos
     },
   })
 
   const addTodoMutation = useMutation({
     mutationFn: async (title: string) => {
-      const response = await axios.post('http://localhost:4000/api/todos', { title })
+      const response = await axios.post(API_ENDPOINTS.todos, { title })
       return response.data
     },
     onSuccess: () => {
@@ -46,7 +47,7 @@ export default function Home() {
 
   const toggleTodoMutation = useMutation({
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
-      const response = await axios.patch(`http://localhost:4000/api/todos/${id}`, { completed })
+      const response = await axios.patch(`${API_ENDPOINTS.todos}/${id}`, { completed })
       return response.data
     },
     onSuccess: () => {
@@ -56,7 +57,7 @@ export default function Home() {
 
   const deleteTodoMutation = useMutation({
     mutationFn: async (id: string) => {
-      await axios.delete(`http://localhost:4000/api/todos/${id}`)
+      await axios.delete(`${API_ENDPOINTS.todos}/${id}`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['todos'] })

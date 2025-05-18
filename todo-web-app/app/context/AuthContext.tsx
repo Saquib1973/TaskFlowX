@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true)
         // Set the token in axios headers
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-      } catch (error) {
+      } catch {
         // If there's an error parsing the user data, clear the invalid data
         Cookies.remove('token')
         Cookies.remove('user')
