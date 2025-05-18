@@ -1,1 +1,51 @@
 @import "tailwindcss";
+
+.gradient-spinner {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    #2563eb,
+    #3b82f6,
+    #60a5fa,
+    #93c5fd,
+    #dbeafe,
+    #93c5fd,
+    #60a5fa,
+    #3b82f6,
+    #2563eb
+  );
+  background-size: 300% 300%;
+  animation: gradientMove 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  filter: blur(0.5px);
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+    transform: rotate(0deg);
+  }
+  50% {
+    background-position: 100% 50%;
+    transform: rotate(180deg);
+  }
+  100% {
+    background-position: 0% 50%;
+    transform: rotate(360deg);
+  }
+}
+
+.loader-container {
+  animation: spin 2s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

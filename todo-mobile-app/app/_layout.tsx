@@ -1,7 +1,12 @@
 import { Stack } from 'expo-router';
+import { useAuth } from '../hooks/useAuth';
 
 export default function RootLayout() {
-  return (
-    <Stack screenOptions={{ headerShown: false }} />
-  );
+  const { isLoading } = useAuth();
+
+  if (isLoading) {
+    return null; // Or a loading spinner
+  }
+
+  return <Stack screenOptions={{ headerShown: false }} />;
 }

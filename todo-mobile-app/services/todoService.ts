@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL } from './../../todo-web-app/app/config';
+import { API_BASE_URL } from '../config';
 
 const API_URL = API_BASE_URL + '/api'
 

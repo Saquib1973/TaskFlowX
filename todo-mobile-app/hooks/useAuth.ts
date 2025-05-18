@@ -1,8 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
+import { router, useSegments } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { API_BASE_URL } from './../../todo-web-app/app/config';
-
+import { API_BASE_URL } from '../config';
 const API_URL = API_BASE_URL + '/api'
 
 interface User {
@@ -23,10 +22,23 @@ export const useAuth = () => {
     token: null,
     isLoading: true,
   });
+  const segments = useSegments();
 
   useEffect(() => {
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    const inAuthGroup = segments[0] === 'auth';
+
+    if (!state.token && !inAuthGroup) {
+      // Redirect to login if not authenticated and not in auth group
+      router.replace('/auth/login');
+    } else if (state.token && inAuthGroup) {
+      // Redirect to home if authenticated and in auth group
+      router.replace('/');
+    }
+  }, [state.token, segments]);
 
   const checkAuth = async () => {
     try {
