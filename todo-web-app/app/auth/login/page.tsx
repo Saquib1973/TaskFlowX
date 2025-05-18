@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import axios from 'axios'
 import { useAuth } from '../../context/AuthContext'
+import { API_BASE_URL } from '../../config'
 
 interface LoginResponse {
   status: string
@@ -32,7 +33,7 @@ export default function LoginPage() {
 
     try {
       console.log('Attempting login...')
-      const response = await axios.post<LoginResponse>('http://localhost:4000/api/auth/login', {
+      const response = await axios.post<LoginResponse>(API_BASE_URL+'/api/auth/login', {
         email,
         password,
       })

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import axios from 'axios'
 import { useAuth } from '../../context/AuthContext'
+import { API_BASE_URL } from '../../config'
 
 interface RegisterResponse {
   status: string
@@ -33,7 +34,7 @@ export default function RegisterPage() {
 
     try {
       console.log('Attempting registration...')
-      const response = await axios.post<RegisterResponse>('http://localhost:4000/api/auth/register', {
+      const response = await axios.post<RegisterResponse>(API_BASE_URL+'/api/auth/register', {
         name,
         email,
         password,
