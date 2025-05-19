@@ -1,22 +1,28 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { useAuth } from '../../context/AuthContext'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  PlusIcon,
-  TrashIcon,
-  CheckIcon,
-  ArrowRightOnRectangleIcon,
-} from '@heroicons/react/24/outline'
 import axios from 'axios'
-import { useAuth } from '../context/AuthContext'
-import { API_ENDPOINTS } from '../config'
+import { API_ENDPOINTS } from '../../config'
+import { Header } from '../../components/todos/Header'
+import { TodoForm } from '../../components/todos/TodoForm'
+import { TodoList } from '../../components/todos/TodoList'
+import PageAnimateWrapper from '../../components/PageAnimateWrapper'
 
 interface Todo {
   id: string
   title: string
+  description: string
   completed: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+interface TodoUpdateData {
+  title?: string
+  description?: string
+  completed?: boolean
 }
 
 interface TodosResponse {
@@ -26,10 +32,101 @@ interface TodosResponse {
   }
 }
 
+function TodoSkeleton() {
+  return (
+    <div className="min-h-screen bg-bgPrimary">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header skeleton */}
+        <div className="animate-pulse mb-8">
+          <div className="h-8 w-48 bg-gray-200 rounded" />
+        </div>
+
+        {/* Form skeleton */}
+        <div className="animate-pulse mb-8">
+          <div className="h-12 bg-gray-200 rounded-lg" />
+        </div>
+
+        {/* Grid skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-lg shadow-sm p-6 animate-pulse"
+            >
+              {/* Title skeleton */}
+              <div className="h-6 w-3/4 bg-gray-200 rounded mb-4" />
+
+              {/* Description skeleton */}
+              <div className="space-y-2 mb-4">
+                <div className="h-4 w-full bg-gray-200 rounded" />
+                <div className="h-4 w-5/6 bg-gray-200 rounded" />
+              </div>
+
+              {/* Status and date skeletons */}
+              <div className="flex items-center justify-between">
+                <div className="h-4 w-20 bg-gray-200 rounded" />
+                <div className="h-4 w-24 bg-gray-200 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ListSkeleton() {
+  return (
+    <div className="min-h-screen bg-bgPrimary">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header skeleton */}
+        <div className="animate-pulse mb-8">
+          <div className="h-8 w-48 bg-gray-200 rounded" />
+        </div>
+
+        {/* Form skeleton */}
+        <div className="animate-pulse mb-8">
+          <div className="h-12 bg-gray-200 rounded-lg" />
+        </div>
+
+        {/* List skeleton */}
+        <div className="space-y-4">
+          {[...Array(4)].map((_, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-lg shadow-sm p-6 animate-pulse"
+            >
+              <div className="flex items-center justify-between">
+                {/* Title and description skeleton */}
+                <div className="flex-1">
+                  <div className="h-5 w-3/4 bg-gray-200 rounded mb-2" />
+                  <div className="h-4 w-1/2 bg-gray-200 rounded" />
+                </div>
+                {/* Status and date skeletons */}
+                <div className="flex items-center gap-4">
+                  <div className="h-4 w-20 bg-gray-200 rounded" />
+                  <div className="h-4 w-24 bg-gray-200 rounded" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Home() {
+  const { user, isAuthenticated, isLoading: authLoading, updateUser, logout } = useAuth()
+  const [isGridLayout, setIsGridLayout] = useState(false)
   const [newTodo, setNewTodo] = useState('')
   const queryClient = useQueryClient()
-  const { logout, user } = useAuth()
+
+  useEffect(() => {
+    if (user?.preferences?.layout) {
+      setIsGridLayout(user.preferences.layout === 'grid')
+    }
+  }, [user])
 
   const { data: todos = [], isLoading } = useQuery<Todo[]>({
     queryKey: ['todos'],
@@ -37,30 +134,22 @@ export default function Home() {
       const response = await axios.get<TodosResponse>(API_ENDPOINTS.todos)
       return response.data.data.todos
     },
+    enabled: isAuthenticated && !authLoading,
   })
 
-  const addTodoMutation = useMutation({
-    mutationFn: async (title: string) => {
-      const response = await axios.post(API_ENDPOINTS.todos, { title })
+  const createTodoMutation = useMutation({
+    mutationFn: async (newTodo: { title: string; description: string }) => {
+      const response = await axios.post(API_ENDPOINTS.todos, newTodo)
       return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['todos'] })
-      setNewTodo('')
     },
   })
 
-  const toggleTodoMutation = useMutation({
-    mutationFn: async ({
-      id,
-      completed,
-    }: {
-      id: string
-      completed: boolean
-    }) => {
-      const response = await axios.patch(`${API_ENDPOINTS.todos}/${id}`, {
-        completed,
-      })
+  const updateTodoMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: TodoUpdateData }) => {
+      const response = await axios.patch(`${API_ENDPOINTS.todos}/${id}`, data)
       return response.data
     },
     onSuccess: () => {
@@ -70,7 +159,8 @@ export default function Home() {
 
   const deleteTodoMutation = useMutation({
     mutationFn: async (id: string) => {
-      await axios.delete(`${API_ENDPOINTS.todos}/${id}`)
+      const response = await axios.delete(`${API_ENDPOINTS.todos}/${id}`)
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['todos'] })
@@ -80,188 +170,69 @@ export default function Home() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (newTodo.trim()) {
-      addTodoMutation.mutate(newTodo.trim())
-    }
-  }
-  const renderTodo = () => {
-    if (isLoading) {
-      return (
-        <motion.div
-          className="space-y-3"
-          initial="hidden"
-          animate="visible"
-          variants={{
-            visible: {
-              transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.1
-              }
-            }
-          }}
-        >
-          {[1, 2, 3].map((index) => (
-            <motion.div
-              key={index}
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: { opacity: 1, y: 0 }
-              }}
-              className="bg-white rounded-lg shadow-sm p-4 flex items-center justify-between"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-6 h-6 bg-gray-200 rounded-full animate-pulse" />
-                <div className="h-6 w-48 bg-gray-200 rounded animate-pulse" />
-              </div>
-              <div className="w-5 h-5 bg-gray-200 rounded animate-pulse" />
-            </motion.div>
-          ))}
-        </motion.div>
-      )
-    } else if (todos.length === 0) {
-      return (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="text-center text-gray-500 mt-8"
-        >
-          No todos yet. Add one above!
-        </motion.div>
-      )
-    } else {
-      return (
-        <AnimatePresence mode="popLayout">
-          <motion.div
-            className="space-y-3"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              visible: {
-                transition: {
-                  staggerChildren: 0.1,
-                  delayChildren: 0.1
-                }
-              }
-            }}
-          >
-            {Array.isArray(todos) &&
-              todos.map((todo) => (
-                <motion.div
-                  key={todo.id}
-                  layout
-                  variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0 }
-                  }}
-                  exit={{
-                    opacity: 0,
-                    x: -100,
-                    transition: { duration: 0.3, ease: "easeInOut" }
-                  }}
-                  transition={{
-                    layout: { duration: 0.3 },
-                    default: { duration: 0.2 }
-                  }}
-                  className="bg-white rounded-lg shadow-sm transition-shadow duration-200 p-4 flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-4">
-                    <motion.button
-                      onClick={() =>
-                        toggleTodoMutation.mutate({
-                          id: todo.id,
-                          completed: !todo.completed,
-                        })
-                      }
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200 ${
-                        todo.completed
-                          ? 'bg-green-500 border-green-500'
-                          : 'border-gray-300 hover:border-green-500'
-                      }`}
-                    >
-                      {todo.completed && (
-                        <CheckIcon className="h-4 w-4 text-white" />
-                      )}
-                    </motion.button>
-                    <span
-                      className={`text-lg transition-all duration-200 ${
-                        todo.completed
-                          ? 'line-through text-gray-400'
-                          : 'text-gray-700'
-                      }`}
-                    >
-                      {todo.title}
-                    </span>
-                  </div>
-                  <motion.button
-                    onClick={() => deleteTodoMutation.mutate(todo.id)}
-                    className="text-gray-400 hover:text-red-500 transition-colors duration-200"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </motion.button>
-                </motion.div>
-              ))}
-          </motion.div>
-        </AnimatePresence>
-      )
+      createTodoMutation.mutate({
+        title: newTodo.trim(),
+        description: ''
+      })
+      setNewTodo('')
     }
   }
 
+  const handleToggleTodo = (id: string, completed: boolean) => {
+    updateTodoMutation.mutate({
+      id,
+      data: { completed }
+    })
+  }
+
+  const handleDeleteTodo = (id: string) => {
+    deleteTodoMutation.mutate(id)
+  }
+
+  const handleLayoutToggle = () => {
+    const newLayout = !isGridLayout
+    setIsGridLayout(newLayout)
+    if (user) {
+      updateUser({
+        preferences: {
+          layout: newLayout ? 'grid' : 'list'
+        }
+      })
+    }
+  }
+
+  if (authLoading || isLoading) {
+    return (
+      <PageAnimateWrapper>
+        {isGridLayout ? <TodoSkeleton /> : <ListSkeleton />}
+      </PageAnimateWrapper>
+    )
+  }
+
   return (
-    <Suspense>
-      <main className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="flex justify-between items-center mb-10"
-          >
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">TodoFlow
-                <span className='text-blue-500 text-4xl'>
-                X
-                </span>
-              </h1>
-              {user && (
-                <p className="text-sm text-gray-600 mt-1">
-                  Welcome back, {user.name}
-                </p>
-              )}
-            </div>
-            <motion.button
-              onClick={logout}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
-            >
-              <ArrowRightOnRectangleIcon className="h-5 w-5" />
-              <span>Logout</span>
-            </motion.button>
-          </motion.div>
-          <motion.form
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
+    <PageAnimateWrapper>
+      <div className="min-h-screen bg-bgPrimary">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Header
+            userName={user?.name}
+            onLogout={logout}
+            isGridLayout={isGridLayout}
+            onLayoutToggle={handleLayoutToggle}
+          />
+          <TodoForm
+            value={newTodo}
+            onChange={setNewTodo}
             onSubmit={handleSubmit}
-            className="mb-10"
-          >
-            <div className="flex gap-3">
-              <input
-                type="text"
-                value={newTodo}
-                onChange={(e) => setNewTodo(e.target.value)}
-                placeholder="What needs to be done?"
-                className="flex-1 rounded-lg border outline-none border-gray-200 px-4 py-3 transition-all duration-200"
-              />
-              <motion.button
-                type="submit"
-                className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors duration-200"
-              >
-                <PlusIcon className="h-6 w-6" />
-              </motion.button>
-            </div>
-          </motion.form>
-          {renderTodo()}
+          />
+          <TodoList
+            todos={todos}
+            isLoading={isLoading}
+            onToggle={handleToggleTodo}
+            onDelete={handleDeleteTodo}
+            isGridLayout={isGridLayout}
+          />
         </div>
-      </main>
-    </Suspense>
+      </div>
+    </PageAnimateWrapper>
   )
 }

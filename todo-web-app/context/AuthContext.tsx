@@ -9,13 +9,18 @@ interface User {
   id: string
   name: string
   email: string
+  preferences?: {
+    layout: 'list' | 'grid'
+  }
 }
 
 interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
+  isLoading: boolean
   login: (token: string, user: User) => void
   logout: () => void
+  updateUser: (userData: Partial<User>) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -23,6 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -46,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         delete axios.defaults.headers.common['Authorization']
       }
     }
+    setIsLoading(false)
   }, [])
 
   const login = (token: string, userData: User) => {
@@ -56,6 +63,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(true)
     // Set the token in axios headers
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+  }
+
+  const updateUser = (userData: Partial<User>) => {
+    if (user) {
+      const updatedUser = { ...user, ...userData }
+      setUser(updatedUser)
+      // Update cookies with the new user data
+      Cookies.set('user', JSON.stringify(updatedUser), { expires: 7 })
+    }
   }
 
   const logout = () => {
@@ -69,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   )

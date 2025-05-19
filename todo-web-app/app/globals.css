@@ -1,51 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Galindo&display=swap');
 @import "tailwindcss";
-
-.gradient-spinner {
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  background: linear-gradient(
-    90deg,
-    #2563eb,
-    #3b82f6,
-    #60a5fa,
-    #93c5fd,
-    #dbeafe,
-    #93c5fd,
-    #60a5fa,
-    #3b82f6,
-    #2563eb
-  );
-  background-size: 300% 300%;
-  animation: gradientMove 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  filter: blur(0.5px);
+@font-face {
+    font-family: 'Comic Neue';
+    src: url('/fonts/Comic_Neue/ComicNeue-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
 }
 
-@keyframes gradientMove {
-  0% {
-    background-position: 0% 50%;
-    transform: rotate(0deg);
-  }
-  50% {
-    background-position: 100% 50%;
-    transform: rotate(180deg);
-  }
-  100% {
-    background-position: 0% 50%;
-    transform: rotate(360deg);
-  }
+@font-face {
+    font-family: 'Galindo';
+    src: url('/fonts/Galindo/Galindo-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
 }
 
-.loader-container {
-  animation: spin 2s linear infinite;
-  transform-origin: center;
+@theme {
+    --font-simple: 'Comic Neue', 'regular';
+    --font-unique: 'Galindo', 'regular';
+
+    --color-bgPrimary: #F5F7FA;
+    --color-bgSecondary: #E4E7EB;
+    --color-textPrimary: #2D3748;
+    --color-textSecondary: #718096;
+    --color-surfacePrimary: #FFFFFF;
+    --color-surfaceSecondary: #EDF2F7;
+    --color-accentPrimary: #4299E1;
+    --color-accentSecondary: #63B3ED;
+    --color-red: #FF0000;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+    @variant dark {
+        --color-bgPrimary: #1A202C;
+        --color-bgSecondary: #2D3748;
+        --color-textPrimary: #F7FAFC;
+        --color-textSecondary: #A0AEC0;
+        --color-surfacePrimary: #2D3748;
+        --color-surfaceSecondary: #4A5568;
+        --color-accentPrimary: #63B3ED;
+        --color-accentSecondary: #90CDF4;
+    }
+}
+
+@layer utilities {
+    .font-primary {
+        font-family: var(--font-primary);
+    }
+    .font-display {
+        font-family: var(--font-display);
+    }
+    .font-simple {
+        font-family: var(--font-simple);
+    }
+    .font-unique {
+        font-family: var(--font-unique);
+    }
 }

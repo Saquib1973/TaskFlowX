@@ -2,14 +2,13 @@
 
 import React from 'react'
 import { FaAndroid, FaDownload } from 'react-icons/fa'
+import PageAnimateWrapper from '../../components/PageAnimateWrapper'
 
-// Client Component for the download button
 const DownloadButton = () => {
   return (
     <button
       className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
       onClick={() => {
-        // Replace with actual download link
         window.location.href = '/android-app.apk'
       }}
     >
@@ -21,11 +20,11 @@ const DownloadButton = () => {
   )
 }
 
-// Server Component (default page)
 export default function DownloadAndroidPage() {
   return (
-    <div className="py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
+    <PageAnimateWrapper>
+    <div className="py-12 min-h-screen flex items-center justify-center w-full px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl w-full mx-auto">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Download Our Android App
@@ -76,6 +75,7 @@ export default function DownloadAndroidPage() {
           </p>
         </div>
       </div>
-    </div>
+      </div>
+      </PageAnimateWrapper>
   )
 }
