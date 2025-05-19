@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,12 +13,23 @@ import { FontAwesome } from '@expo/vector-icons';
 import { colors } from '@/constants/style';
 
 export default function ProfileScreen() {
-  const { user, logout } = useAuth();
+  const { user, logout, checkAuth } = useAuth();
+
+  useEffect(() => {
+    console.log('📱 [Page] Profile page mounted')
+    checkAuth()
+    return () => {
+      console.log('📱 [Page] Profile page unmounted')
+    }
+  }, [])
 
   const handleLogout = async () => {
     try {
+      console.log('🔒 [Auth] Attempting to logout user')
       await logout();
+      console.log('🔒 [Auth] User logged out successfully')
     } catch (error) {
+      console.error('❌ [Auth] Logout failed:', error)
       Alert.alert('Error', 'Failed to logout. Please try again.');
     }
   };

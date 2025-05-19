@@ -12,7 +12,7 @@ interface Todo {
   updatedAt: string;
 }
 
-const getAuthHeader = async () => {
+export const getAuthHeader = async () => {
   const token = await AsyncStorage.getItem('token');
   return {
     'Content-Type': 'application/json',

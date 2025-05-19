@@ -25,20 +25,47 @@ export const useAuth = () => {
   const segments = useSegments();
 
   useEffect(() => {
-    checkAuth();
-  }, []);
+    const checkAuthAndProtectRoutes = async () => {
+      try {
+        const currentRoute = segments[0];
+        console.log('🔍 [Route] Current route:', currentRoute);
 
-  useEffect(() => {
-    const inAuthGroup = segments[0] === 'auth';
+        const token = await AsyncStorage.getItem('token');
+        const userStr = await AsyncStorage.getItem('user');
+        const user = userStr ? JSON.parse(userStr) : null;
 
-    if (!state.token && !inAuthGroup) {
-      // Redirect to login if not authenticated and not in auth group
-      router.replace('/auth/login');
-    } else if (state.token && inAuthGroup) {
-      // Redirect to home if authenticated and in auth group
-      router.replace('/');
-    }
-  }, [state.token, segments]);
+        setState({
+          user,
+          token,
+          isLoading: false,
+        });
+
+        const protectedRoutes = ['profile', 'home', ''];
+        const authRoutes = ['login', 'register'];
+
+        if (!token) {
+          if (protectedRoutes.includes(currentRoute)) {
+            console.log('🔒 [Auth] No token found, redirecting from protected route to login');
+            router.replace('/auth/login');
+          }
+        } else {
+          if (authRoutes.includes(currentRoute)) {
+            console.log('🔒 [Auth] User authenticated, redirecting from auth route to home');
+            router.replace('/');
+          }
+        }
+      } catch (error) {
+        console.error('❌ [Auth] Error checking auth:', error);
+        setState({
+          user: null,
+          token: null,
+          isLoading: false,
+        });
+      }
+    };
+
+    checkAuthAndProtectRoutes();
+  }, [segments]);
 
   const checkAuth = async () => {
     try {
@@ -52,7 +79,7 @@ export const useAuth = () => {
         isLoading: false,
       });
     } catch (error) {
-      console.error('Error checking auth:', error);
+      console.error('❌ [Auth] Error checking auth:', error);
       setState({
         user: null,
         token: null,
@@ -63,6 +90,7 @@ export const useAuth = () => {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('🔑 [Auth] Attempting login...');
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
@@ -90,9 +118,10 @@ export const useAuth = () => {
         isLoading: false,
       });
 
+      console.log('✅ [Auth] Login successful, redirecting to home');
       router.replace('/');
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('❌ [Auth] Login error:', error);
       if (error instanceof Error) {
         throw new Error(`Login failed: ${error.message}`);
       }
@@ -141,6 +170,7 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
+      console.log('🔒 [Auth] Attempting logout...');
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');
       setState({
@@ -148,15 +178,17 @@ export const useAuth = () => {
         token: null,
         isLoading: false,
       });
-      router.replace('/auth/login');
+      console.log('✅ [Auth] Logout successful, redirecting to index');
+      router.replace('/');
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('❌ [Auth] Logout error:', error);
       throw error;
     }
   };
 
   return {
     ...state,
+    checkAuth,
     login,
     register,
     logout,

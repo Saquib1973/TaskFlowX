@@ -26,7 +26,7 @@ export const GitHubSection = () => (
     </motion.p>
     <motion.div variants={heroItemVariants} className="flex gap-4">
       <Link
-        href="https://github.com/yourusername/todo-web-app"
+        href="https://github.com/Saquib1973/TaskFlowX"
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center gap-2 rounded px-6 py-4 text-base font-medium uppercase text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 md:text-lg bg-indigo-600 hover:bg-indigo-800 shadow-[4px_4px_0px_black] hover:shadow-[8px_8px_0px_black] font-simple"
@@ -35,7 +35,7 @@ export const GitHubSection = () => (
         <span>Star on GitHub</span>
       </Link>
       <Link
-        href="https://github.com/yourusername/todo-web-app/blob/main/CONTRIBUTING.md"
+        href="https://github.com/Saquib1973/TaskFlowX"
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center gap-2 rounded px-6 py-4 text-base font-medium uppercase text-white transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 md:text-lg bg-indigo-600 hover:bg-indigo-800 shadow-[4px_4px_0px_black] hover:shadow-[8px_8px_0px_black] font-simple"
