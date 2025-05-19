@@ -1,5 +1,5 @@
 import React from 'react';
-import PageAnimateWrapper from '../../components/PageAnimateWrapper';
+import PageAnimateWrapper from '../../../components/PageAnimateWrapper';
 
 export default function Help() {
   return (

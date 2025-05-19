@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { FaAndroid, FaDownload } from 'react-icons/fa'
-import PageAnimateWrapper from '../../components/PageAnimateWrapper'
+import PageAnimateWrapper from '../../../components/PageAnimateWrapper'
 
 const DownloadButton = () => {
   return (

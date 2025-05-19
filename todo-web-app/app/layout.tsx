@@ -4,7 +4,7 @@ import "./globals.css";
 import "./style.css";
 import Providers from "../context/providers";
 import DownloadBanner from "../components/DownloadBanner";
-import Footer from "../components/Footer";
+import FooterComponent from '../components/FooterComponent';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,7 +27,7 @@ export default function RootLayout({
           <div className="flex flex-col min-h-screen">
             <DownloadBanner />
             <main className="flex-grow">{children}</main>
-            <Footer />
+            <FooterComponent />
           </div>
         </Providers>
       </body>

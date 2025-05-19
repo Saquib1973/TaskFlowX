@@ -1,11 +1,17 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
-import { FaGithub, FaHome, FaQuestionCircle, FaAndroid, FaList } from 'react-icons/fa'
+import {
+  FaGithub,
+  FaHome,
+  FaQuestionCircle,
+  FaAndroid,
+  FaList,
+} from 'react-icons/fa'
 import { usePathname } from 'next/navigation'
 import PageAnimateWrapper from './PageAnimateWrapper'
 
-const Footer = () => {
+const FooterComponent = () => {
   const pathname = usePathname()
   if (
     pathname === '/auth/login' ||
@@ -119,7 +125,9 @@ const Footer = () => {
                 </div>
                 <div className="text-sm text-textSecondary">
                   <p className="font-medium">Have questions?</p>
-                  <p className="mt-1">Reach out to us at saquibali35@gmail.com</p>
+                  <p className="mt-1">
+                    Reach out to us at saquibali35@gmail.com
+                  </p>
                 </div>
               </div>
             </div>
@@ -143,4 +151,4 @@ const Footer = () => {
   )
 }
 
-export default Footer
+export default FooterComponent
